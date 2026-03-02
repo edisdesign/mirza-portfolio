@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-// ISPRAVLJENE PUTANJE: Umesto '@/components/ui/...' koristimo './ui/...'
+// ISPRAVLJENE PUTANJE: Koristimo './ui/...' jer su fajlovi u istom folderu
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
-// Ostatak je isti
 import { supabase, type Work } from '../lib/supabase';
 import { toast } from 'sonner';
 
@@ -163,4 +162,84 @@ export function WorkEditModal({ work, open, onClose, onSave }: WorkEditModalProp
               <Label>Naslov</Label>
               <Input 
                 value={formData.title || ''} 
-                onChange={e => setFormData({...formData, title
+                onChange={e => setFormData({...formData, title: e.target.value})}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Godina</Label>
+              <Input 
+                value={formData.year || ''} 
+                onChange={e => setFormData({...formData, year: e.target.value})}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Tehnika</Label>
+              <Input 
+                value={formData.technique || ''} 
+                onChange={e => setFormData({...formData, technique: e.target.value})}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Dimenzije</Label>
+              <Input 
+                value={formData.size || ''} 
+                onChange={e => setFormData({...formData, size: e.target.value})}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Kategorija</Label>
+            <Input 
+              value={formData.category || ''} 
+              onChange={e => setFormData({...formData, category: e.target.value})}
+              className="bg-white/5 border-white/10"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Opis</Label>
+            <Textarea 
+              value={formData.description || ''} 
+              onChange={e => setFormData({...formData, description: e.target.value})}
+              className="bg-white/5 border-white/10 h-24"
+            />
+          </div>
+
+          <div className="flex gap-8 pt-2">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                checked={formData.featured || false}
+                onCheckedChange={c => setFormData({...formData, featured: c})}
+              />
+              <Label>Izdvojeno (Homepage)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch 
+                checked={formData.landscape || false}
+                onCheckedChange={c => setFormData({...formData, landscape: c})}
+              />
+              <Label>Landscape (Široka slika)</Label>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} className="border-white/10 hover:bg-white/5 text-[#f5f0eb]">
+            Otkaži
+          </Button>
+          <Button onClick={handleSave} disabled={loading} className="bg-[#c9a96e] text-black hover:bg-[#b0935d]">
+            {loading ? 'Čuvanje...' : 'Sačuvaj'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
