@@ -1,117 +1,41 @@
-import { Link } from "react-router";
-import svgPaths from "../../imports/svg-b9tvxp02ga";
-
-function Signature({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 406.372 96.618"
-      fill="none"
-      preserveAspectRatio="xMidYMid meet"
-      className={className}
-    >
-      <g clipPath="url(#clip0_footer)">
-        <path
-          d={svgPaths.p1c3cc380}
-          fill="currentColor"
-          fillOpacity="0.97"
-        />
-        <path
-          d={svgPaths.p2ac06900}
-          fill="currentColor"
-          fillOpacity="0.98"
-        />
-        <path
-          d={svgPaths.p3cbfdff1}
-          fill="currentColor"
-          fillOpacity="0.99"
-        />
-        <path
-          d={svgPaths.p311f4440}
-          fill="currentColor"
-          fillOpacity="0.98"
-        />
-        <path
-          d={svgPaths.pd6a9000}
-          fill="currentColor"
-          fillOpacity="0.97"
-        />
-        <path d={svgPaths.p17339b80} fill="currentColor" />
-      </g>
-      <defs>
-        <clipPath id="clip0_footer">
-          <rect fill="white" height="96.618" width="406.372" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
-}
+import { Link } from 'react-router';
+import { MoreHorizontal } from 'lucide-react'; // Dodali smo ikonicu
 
 export function Footer() {
   return (
-    <footer className="py-12 px-6 md:px-12 border-t border-white/5">
-      <div className="max-w-[1400px] mx-auto flex flex-col gap-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Signature SVG instead of text */}
-          <div className="text-[#f5f0eb]/40 hover:text-[#c9a96e]/60 transition-colors duration-500">
-            <Signature className="h-[28px] w-auto" />
-          </div>
-          <div className="flex items-center gap-8">
-            <a
-              href="https://www.instagram.com/mirzasmajlovich/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#8a8580] hover:text-[#c9a96e] font-['Outfit'] text-[12px] tracking-[0.15em] uppercase transition-colors duration-300"
-            >
-              Instagram
-            </a>
-            <a
-              href="mailto:slikarsmajlovic@gmail.com"
-              className="text-[#8a8580] hover:text-[#c9a96e] font-['Outfit'] text-[12px] tracking-[0.15em] uppercase transition-colors duration-300"
-            >
-              Email
-            </a>
-            <a
-              href="https://wa.me/387603013005"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#8a8580] hover:text-[#c9a96e] font-['Outfit'] text-[12px] tracking-[0.15em] uppercase transition-colors duration-300"
-            >
-              WhatsApp
-            </a>
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/5">
+    <footer className="bg-[#0a0a0a] py-12 px-6 md:px-12 border-t border-white/5 relative">
+      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+        
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
+          <p className="text-[#8a8580] font-['Outfit'] text-[14px]">
+            © {new Date().getFullYear()} Mirza Smajlović. Sva prava zadržana.
+          </p>
+          
           <div className="flex items-center gap-6">
-            <Link
-              to="/impresum"
-              className="text-[#8a8580]/50 hover:text-[#8a8580] font-['Outfit'] text-[11px] tracking-[0.15em] uppercase transition-colors duration-300"
-            >
-              Impresum
-            </Link>
-            <Link
-              to="/politika-privatnosti"
-              className="text-[#8a8580]/50 hover:text-[#8a8580] font-['Outfit'] text-[11px] tracking-[0.15em] uppercase transition-colors duration-300"
-            >
+            <Link to="/privatnost" className="text-[#8a8580] hover:text-[#c9a96e] transition-colors text-[14px]">
               Politika privatnosti
             </Link>
-          </div>
-          <p className="text-[#8a8580]/40 font-['Outfit'] text-[12px]">
-            &copy; 2026 Sva prava zadržana
-          </p>
-          <div className="flex items-center gap-3">
-            <a
-              href="mailto:edis.design@outlook.com"
-              className="text-[#8a8580]/30 hover:text-[#c9a96e]/60 font-['Outfit'] text-[11px] tracking-[0.1em] transition-colors duration-300"
-            >
-              Designed by Ed
-            </a>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('mirza:openlogin'))}
-              className="w-2 h-2 rounded-full bg-transparent hover:bg-[#c9a96e]/20 transition-colors duration-300 cursor-pointer"
-              title=""
-            />
+            <Link to="/impresum" className="text-[#8a8580] hover:text-[#c9a96e] transition-colors text-[14px]">
+              Impresum
+            </Link>
           </div>
         </div>
+
+        <div className="flex items-center gap-4">
+          <p className="text-[#444] font-['Outfit'] text-[12px] tracking-widest uppercase">
+            Designed by Ed
+          </p>
+          
+          {/* Admin Trigger - Sada vidljiv kao 3 tačkice */}
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('mirza:openlogin'))}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-white/10 text-white/20 hover:text-[#c9a96e] hover:border-[#c9a96e] hover:bg-white/5 transition-all duration-300"
+            title="Admin Login"
+          >
+            <MoreHorizontal size={16} />
+          </button>
+        </div>
+
       </div>
     </footer>
   );
