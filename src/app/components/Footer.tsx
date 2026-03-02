@@ -23,7 +23,7 @@ export function Footer() {
 
         <div className="flex items-center gap-4">
           <p className="text-[#444] font-['Outfit'] text-[12px] tracking-widest uppercase">
-            Designed by Ed
+            Designed by Edo
           </p>
           
           {/* Admin Trigger - Sada vidljiv kao 3 tačkice */}
