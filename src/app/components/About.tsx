@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 // Uvozimo TVOJ novi portret
-import aboutImg from '../../assets/artist_portrait.png';
+import aboutImg from '../../assets/artist_portrait.png.png';
 
 export function About() {
   return (

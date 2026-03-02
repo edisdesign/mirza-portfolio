@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 // Placeholder slika ateljea
-import atelierImg from '../assets/32271cfd070102d1b170812e93e278c9cba4e6ed.png';
+import atelierImg from '../assets/hero_bg.png.png';
 
 export function ProcessSection() {
   const steps = [
