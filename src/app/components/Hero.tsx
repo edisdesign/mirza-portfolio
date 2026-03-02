@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ArrowDown } from 'lucide-react';
 // Uvozimo TVOJU novu sliku
-import heroBg from '../../assets/bg.png'; 
+import heroBg from '/bg.png'; 
 
 export function Hero() {
   const scrollToWorks = () => {
