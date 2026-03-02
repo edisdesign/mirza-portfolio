@@ -10,22 +10,20 @@ type Props = {
 
 export function AdminLoginModal({ open, onClose }: Props) {
   const { login } = useAdmin();
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !password) return;
+    if (!password) return;
     setLoading(true);
     setError('');
-    const err = await login(email, password);
+    const err = await login(password);
     setLoading(false);
     if (err) {
-      setError('Pogrešni podaci. Pokušajte ponovo.');
+      setError('Pogrešna lozinka. Pokušajte ponovo.');
     } else {
       onClose();
-      setEmail('');
       setPassword('');
     }
   };
@@ -68,18 +66,6 @@ export function AdminLoginModal({ open, onClose }: Props) {
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-[10px] tracking-[0.2em] uppercase text-[#8a8580] mb-2 font-['Outfit']">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                  className="w-full bg-[#0a0a0a] border border-white/10 text-[#f5f0eb] px-4 py-3 text-[14px] font-['Outfit'] outline-none focus:border-[#c9a96e]/40 transition-colors"
-                  placeholder="mirza@..."
-                  autoFocus
-                />
-              </div>
-              <div>
                 <label className="block text-[10px] tracking-[0.2em] uppercase text-[#8a8580] mb-2 font-['Outfit']">Lozinka</label>
                 <input
                   type="password"
@@ -88,6 +74,7 @@ export function AdminLoginModal({ open, onClose }: Props) {
                   onKeyDown={e => e.key === 'Enter' && handleSubmit()}
                   className="w-full bg-[#0a0a0a] border border-white/10 text-[#f5f0eb] px-4 py-3 text-[14px] font-['Outfit'] outline-none focus:border-[#c9a96e]/40 transition-colors"
                   placeholder="••••••••"
+                  autoFocus
                 />
               </div>
             </div>

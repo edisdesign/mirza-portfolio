@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
+
+const ADMIN_PASSWORD = 'mirza2025';
+const STORAGE_KEY = 'mirza_admin';
 
 type AdminContextType = {
   isAdmin: boolean;
   editMode: boolean;
   toggleEditMode: () => void;
-  login: (email: string, password: string) => Promise<string | null>;
+  login: (password: string) => Promise<string | null>;
   logout: () => void;
 };
 
@@ -22,28 +24,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    // Check existing session on load
-    supabase.auth.getSession().then(({ data }) => {
-      setIsAdmin(!!data.session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAdmin(!!session);
-      if (!session) setEditMode(false);
-    });
-
-    return () => subscription.unsubscribe();
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'true') {
+      setIsAdmin(true);
+    }
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return error.message;
-    setEditMode(true);
-    return null;
+  const login = useCallback(async (password: string): Promise<string | null> => {
+    if (password === ADMIN_PASSWORD) {
+      localStorage.setItem(STORAGE_KEY, 'true');
+      setIsAdmin(true);
+      setEditMode(true);
+      return null;
+    }
+    return 'Pogrešna lozinka.';
   }, []);
 
   const logout = useCallback(() => {
-    supabase.auth.signOut();
+    localStorage.removeItem(STORAGE_KEY);
+    setIsAdmin(false);
     setEditMode(false);
   }, []);
 
