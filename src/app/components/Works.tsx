@@ -14,6 +14,7 @@ export function Works({ limit }: { limit?: number }) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [editWork, setEditWork] = useState<Work | null | 'new'>(null);
   const { editMode } = useAdmin();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchWorks = async () => {
     setLoading(true);
@@ -32,6 +33,18 @@ export function Works({ limit }: { limit?: number }) {
   }, [limit]);
 
   const displayWorks = limit ? works.filter(w => w.featured) : works;
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Da li ste sigurni da želite da obrišete ovaj rad?')) return;
+    setDeletingId(id);
+    const { error } = await supabase.from('works').delete().eq('id', id);
+    setDeletingId(null);
+    if (!error) {
+      window.dispatchEvent(new Event('mirza:refresh'));
+    } else {
+      alert('Greška pri brisanju: ' + error.message);
+    }
+  };
 
   return (
     <>
@@ -86,13 +99,27 @@ export function Works({ limit }: { limit?: number }) {
                 >
                   {/* Edit pen button */}
                   {editMode && (
-                    <button
-                      onClick={e => { e.stopPropagation(); setEditWork(work); }}
-                      className="absolute top-3 right-3 z-20 w-9 h-9 bg-[#c9a96e] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#d4b47a] cursor-pointer"
-                      title="Uredi rad"
-                    >
-                      <Pencil size={14} className="text-[#0a0a0a]" />
-                    </button>
+                    <div className="absolute top-3 right-3 z-20 flex gap-2">
+                      <button
+                        onClick={e => { e.stopPropagation(); setEditWork(work); }}
+                        className="w-9 h-9 bg-[#c9a96e] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#d4b47a] cursor-pointer"
+                        title="Uredi rad"
+                      >
+                        <Pencil size={14} className="text-[#0a0a0a]" />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDelete(work.id); }}
+                        className="w-9 h-9 bg-[#f87171] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#fb9a9a] cursor-pointer"
+                        title="Obriši rad"
+                        disabled={deletingId === work.id}
+                      >
+                        {deletingId === work.id ? (
+                          <span className="loader w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+                        )}
+                      </button>
+                    </div>
                   )}
 
                   <div className={`overflow-hidden ${work.landscape ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}>

@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useSearchParams } from "react-router";
-import { ArrowLeft, ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, MapPin, Pencil } from "lucide-react";
 import { supabase, Exhibition } from "../lib/supabase";
+import { ExhibitionEditModal } from "../components/ExhibitionEditModal";
+import { ExhibitionModal } from "../components/ExhibitionModal";
 import { Footer } from "../components/Footer";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { useAdmin } from "../context/AdminContext";
 
 const types = [
   "Sve",
@@ -17,8 +20,10 @@ const types = [
 
 export function ExhibitionsPage() {
   usePageTitle("Izložbe");
+  const { editMode } = useAdmin();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selected, setSelected] = useState<Exhibition | null>(null);
+  const [editExh, setEditExh] = useState<Exhibition | null>(null);
   const [activeType, setActiveType] = useState("Sve");
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,7 +183,17 @@ export function ExhibitionsPage() {
                         delay: Math.min(i * 0.06, 0.3),
                         duration: 0.5,
                       }}
+                      className="group relative"
                     >
+                      {editMode && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setEditExh(ex); }}
+                          className="absolute top-3 right-3 z-20 w-9 h-9 bg-[#c9a96e] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#d4b47a] cursor-pointer"
+                          title="Uredi izložbu"
+                        >
+                          <Pencil size={14} className="text-[#0a0a0a]" />
+                        </button>
+                      )}
                       <button
                         onClick={() => setSelected(ex)}
                         className="group w-full text-left bg-[#111]/50 border border-white/5 hover:border-[#c9a96e]/20 hover:bg-[#111] transition-all duration-300 cursor-pointer overflow-hidden"
@@ -238,14 +253,21 @@ export function ExhibitionsPage() {
 
       <Footer />
 
-      <ExhibitionModal
-        exhibition={selected}
-        onClose={() => setSelected(null)}
-        onNavigate={(id) => {
-          const ex = exhibitions.find((e) => e.id === id);
-          if (ex) setSelected(ex);
-        }}
-      />
+      {selected && (
+        <ExhibitionModal
+          exhibition={selected}
+          onClose={() => setSelected(null)}
+          onNavigate={(id) => {
+            const ex = exhibitions.find((e) => e.id === id);
+            if (ex) setSelected(ex);
+          }}
+          allExhibitions={exhibitions}
+        />
+      )}
+
+      {editExh && (
+        <ExhibitionEditModal exhibition={editExh} onClose={() => setEditExh(null)} onSaved={() => { /* refresh will come from event */ }} />
+      )}
     </>
   );
 }

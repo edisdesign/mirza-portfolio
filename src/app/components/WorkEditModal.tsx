@@ -11,12 +11,11 @@ import { toast } from 'sonner';
 
 interface WorkEditModalProps {
   work: Work | null;
-  open: boolean;
   onClose: () => void;
-  onSave: () => void;
+  onSave?: () => void;
 }
 
-export function WorkEditModal({ work, open, onClose, onSave }: WorkEditModalProps) {
+export function WorkEditModal({ work, onClose, onSave }: WorkEditModalProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Work>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -112,8 +111,10 @@ export function WorkEditModal({ work, open, onClose, onSave }: WorkEditModalProp
         toast.success('Novi rad dodat!');
       }
 
-      onSave(); 
+      onSave?.();
       onClose();
+      // Trigger refresh for other components
+      window.dispatchEvent(new Event('mirza:refresh'));
     } catch (error: any) {
       console.error('Error saving work:', error);
       toast.error('Greška pri čuvanju: ' + error.message);
@@ -123,7 +124,7 @@ export function WorkEditModal({ work, open, onClose, onSave }: WorkEditModalProp
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="bg-[#1a1a1a] text-[#f5f0eb] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{work ? 'Izmeni Rad' : 'Dodaj Novi Rad'}</DialogTitle>

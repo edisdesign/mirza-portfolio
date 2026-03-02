@@ -9,8 +9,13 @@ export function TragoviBanner() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from('exhibitions').select('*').eq('id', 1).single();
-      setTragovi(data || null);
+      // Fetch the latest exhibition by date (assuming date is sortable)
+      const { data, error } = await supabase
+        .from('exhibitions')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(1);
+      setTragovi(data && data.length > 0 ? data[0] : null);
     };
     load();
   }, []);

@@ -15,6 +15,19 @@ export function Exhibitions() {
   const [selected, setSelected] = useState<Exhibition | null>(null);
   const [editExh, setEditExh] = useState<Exhibition | null>(null);
   const { editMode } = useAdmin();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Da li ste sigurni da želite da obrišete ovu izložbu?')) return;
+    setDeletingId(id);
+    const { error } = await supabase.from('exhibitions').delete().eq('id', id);
+    setDeletingId(null);
+    if (!error) {
+      window.dispatchEvent(new Event('mirza:refresh'));
+    } else {
+      alert('Greška pri brisanju: ' + error.message);
+    }
+  };
 
   const fetchExhibitions = async () => {
     setLoading(true);
@@ -77,13 +90,27 @@ export function Exhibitions() {
                   className="group relative"
                 >
                   {editMode && (
-                    <button
-                      onClick={e => { e.stopPropagation(); setEditExh(ex); }}
-                      className="absolute right-16 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-[#c9a96e] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#d4b47a] cursor-pointer"
-                      title="Uredi izložbu"
-                    >
-                      <Pencil size={12} className="text-[#0a0a0a]" />
-                    </button>
+                    <div className="absolute right-16 top-1/2 -translate-y-1/2 z-10 flex gap-2">
+                      <button
+                        onClick={e => { e.stopPropagation(); setEditExh(ex); }}
+                        className="w-8 h-8 bg-[#c9a96e] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#d4b47a] cursor-pointer"
+                        title="Uredi izložbu"
+                      >
+                        <Pencil size={12} className="text-[#0a0a0a]" />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDelete(ex.id); }}
+                        className="w-8 h-8 bg-[#f87171] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#fb9a9a] cursor-pointer"
+                        title="Obriši izložbu"
+                        disabled={deletingId === ex.id}
+                      >
+                        {deletingId === ex.id ? (
+                          <span className="loader w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+                        )}
+                      </button>
+                    </div>
                   )}
 
                   <button
