@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router';
 import { ArrowUpRight, ArrowRight, Pencil } from 'lucide-react';
 import { supabase, Exhibition } from '../lib/supabase';
@@ -76,7 +76,6 @@ export function Exhibitions() {
                   transition={{ delay: i * 0.05, duration: 0.5 }}
                   className="group relative"
                 >
-                  {/* Edit pen */}
                   {editMode && (
                     <button
                       onClick={e => { e.stopPropagation(); setEditExh(ex); }}

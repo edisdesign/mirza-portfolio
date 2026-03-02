@@ -1,10 +1,10 @@
-import { works } from "../data/works";
 import { Footer } from "../components/Footer";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useState, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { ArrowUpRight, ArrowLeft, SlidersHorizontal } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase, Work } from "../lib/supabase";
 
 const filters = [
   { label: "Sve", key: "sve" },
@@ -41,6 +41,23 @@ export function WorksPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>(validFilter);
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [works, setWorks] = useState<Work[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchWorks = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('works').select('*').order('sort_order', { ascending: true });
+    setWorks(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchWorks();
+    const handler = () => fetchWorks();
+    window.addEventListener('mirza:refresh', handler);
+    return () => window.removeEventListener('mirza:refresh', handler);
+  }, []);
 
   const handleFilterChange = (key: FilterKey) => {
     setActiveFilter(key);
@@ -191,13 +208,20 @@ export function WorksPage() {
           </motion.div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {filtered.map((work, i) => (
-              <motion.div
-                key={work.id}
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="animate-pulse bg-[#111] aspect-[4/3]" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {filtered.map((work, i) => (
+                <motion.div
+                  key={work.id}
+                  initial={{ opacity: 0, y: 25 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
                   duration: 0.4,
                   delay: Math.min(i * 0.03, 0.3),
                   ease: [0.22, 1, 0.36, 1],
@@ -257,6 +281,7 @@ export function WorksPage() {
               </motion.div>
             ))}
           </div>
+          )}
 
           {filtered.length === 0 && (
             <div className="text-center py-20">

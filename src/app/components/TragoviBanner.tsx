@@ -1,11 +1,20 @@
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router";
-import { exhibitions } from "../data/exhibitions";
-
-const tragovi = exhibitions.find((ex) => ex.id === 1);
+import { useState, useEffect } from "react";
+import { supabase, Exhibition } from "../lib/supabase";
 
 export function TragoviBanner() {
+  const [tragovi, setTragovi] = useState<Exhibition | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from('exhibitions').select('*').eq('id', 1).single();
+      setTragovi(data || null);
+    };
+    load();
+  }, []);
+
   if (!tragovi) return null;
 
   return (

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight, ArrowRight, Pencil } from 'lucide-react';
@@ -133,8 +133,13 @@ export function Works({ limit }: { limit?: number }) {
         </div>
       </section>
 
-      {editWork && editWork !== 'new' && (
-        <WorkEditModal work={editWork} onClose={() => setEditWork(null)} onSaved={fetchWorks} />
+      {editWork && (
+        <WorkEditModal
+          work={editWork === 'new' ? null : editWork}
+          open={true}
+          onClose={() => setEditWork(null)}
+          onSave={fetchWorks}
+        />
       )}
     </>
   );

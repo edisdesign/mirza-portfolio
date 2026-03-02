@@ -1,7 +1,6 @@
-import { works } from "../data/works";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { ShareMenu } from "../components/ShareMenu";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router";
 import {
@@ -14,6 +13,7 @@ import {
   Mail,
   ArrowUpRight,
 } from "lucide-react";
+import { supabase, Work } from "../lib/supabase";
 
 const PHONE = "+387603013005";
 const EMAIL = "slikarsmajlovic@gmail.com";
@@ -23,6 +23,24 @@ export function WorkDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [works, setWorks] = useState<Work[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchWorks = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('works').select('*').order('sort_order', { ascending: true });
+    setWorks(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchWorks();
+    const handler = () => fetchWorks();
+    window.addEventListener('mirza:refresh', handler);
+    return () => window.removeEventListener('mirza:refresh', handler);
+  }, []);
+
   const work = works.find((w) => w.id === Number(id));
   const currentIndex = works.findIndex((w) => w.id === Number(id));
 
@@ -196,7 +214,7 @@ export function WorkDetailPage() {
     []
   );
 
-  if (!work) {
+  if (!loading && !work) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
