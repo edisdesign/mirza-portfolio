@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-// MENJAMO Figma URL tvojom lokalnom slikom
+// Proveri da li je slika u src/assets/bg.png
 import processImg from "../../assets/bg.png";
 
 export function ProcessSection() {
@@ -7,7 +7,8 @@ export function ProcessSection() {
     <section className="py-32 px-6 md:px-12 bg-[#0a0a0a]">
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Content */}
+          
+          {/* Tekstualni sadržaj (Leva strana na desktopu) */}
           <motion.div
             initial={{ opacity: 0, filter: "blur(12px)", y: 20 }}
             whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
@@ -35,6 +36,7 @@ export function ProcessSection() {
               identitetom, za vremenom, za prisustvom.
             </p>
 
+            {/* Koraci u procesu */}
             <div className="space-y-8">
               {[
                 {
@@ -86,7 +88,7 @@ export function ProcessSection() {
             </div>
           </motion.div>
 
-          {/* Image */}
+          {/* Slika i Citat (Desna strana na desktopu) */}
           <motion.div
             initial={{ opacity: 0, filter: "blur(12px)", scale: 0.97 }}
             whileInView={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
@@ -97,10 +99,24 @@ export function ProcessSection() {
             <div className="aspect-[4/5] overflow-hidden rounded-sm">
               <img
                 src={processImg}
-                alt="Atelje"
+                alt="Atelje Mirze Smajlovića"
                 className="w-full h-full object-cover opacity-60"
               />
             </div>
-            {/* Quote overlay - Figma dizajn */}
+            
+            {/* Citat preko slike */}
             <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0a0a0a] to-transparent">
-              <blockquote className="font-['Outfit'] italic text-[#f5f0eb]/60 text
+              <blockquote 
+                className="font-['Outfit'] italic text-[#f5f0eb]/60 text-[18px] leading-relaxed" 
+                style={{ fontWeight: 300 }}
+              >
+                "Ne nastojim reproducirati stvarnost, već je transformirati u iskustvo."
+              </blockquote>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
