@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-// MENJAMO Figma URL tvojom lokalnom slikom
 import aboutPortrait from "../../assets/me.png";
+import { supabase } from "../lib/supabase";
 
 function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
   const [count, setCount] = useState(0);
@@ -44,12 +44,46 @@ const stats = [
   { number: "10+", numericValue: 10, suffix: "+", label: "Godina iskustva" },
 ];
 
+const DEFAULT_BIO_PARAGRAPHS = [
+  "Mirza Smajlović (r. 1988, Visoko, Bosna i Hercegovina) je akademski slikar čiji se umjetnički rad razvija unutar savremenog figurativnog i ekspresivnog diskursa.",
+  "Njegov opus karakteriše snažan odnos prema motivu prostora i identiteta. Smajlović gradi kompoziciju kroz slojevitu strukturu boje i materijala.",
+  "Član je Udruženja likovnih umjetnika Likum '76 iz Visokog. Izlagao je na samostalnim i grupnim izložbama u Bosni i Hercegovini i regiji.",
+];
+
 export function About() {
+  const [bioParagraphs, setBioParagraphs] = useState<string[]>(DEFAULT_BIO_PARAGRAPHS);
+  const [education, setEducation] = useState<string>('');
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('settings').select('key, value').in('key', ['biography', 'education']);
+      const bioRow = data?.find(r => r.key === 'biography');
+      const eduRow = data?.find(r => r.key === 'education');
+      if (bioRow?.value) {
+        setBioParagraphs(bioRow.value.split('\n\n').filter(Boolean));
+      }
+      if (eduRow?.value) {
+        setEducation(eduRow.value);
+      }
+    })();
+    const h = () => {
+      (async () => {
+        const { data } = await supabase.from('settings').select('key, value').in('key', ['biography', 'education']);
+        const bioRow = data?.find((r: any) => r.key === 'biography');
+        const eduRow = data?.find((r: any) => r.key === 'education');
+        if (bioRow?.value) setBioParagraphs(bioRow.value.split('\n\n').filter(Boolean));
+        if (eduRow?.value) setEducation(eduRow.value);
+      })();
+    };
+    window.addEventListener('mirza:refresh', h);
+    return () => window.removeEventListener('mirza:refresh', h);
+  }, []);
+
   return (
     <section id="about" className="py-32 px-6 md:px-12 bg-[#0a0a0a]">
       <div className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          
+
           {/* Image - Sačuvan Figma stil */}
           <motion.div
             initial={{ opacity: 0, filter: "blur(12px)", x: -30 }}
@@ -89,20 +123,16 @@ export function About() {
             </h2>
 
             <div className="space-y-6 mb-12">
-              <p className="text-[#8a8580] font-['Outfit'] text-[15px] leading-relaxed" style={{ fontWeight: 300 }}>
-                Mirza Smajlović (r. 1988, Visoko, Bosna i Hercegovina) je
-                akademski slikar čiji se umjetnički rad razvija unutar savremenog
-                figurativnog i ekspresivnog diskursa.
-              </p>
-              <p className="text-[#8a8580] font-['Outfit'] text-[15px] leading-relaxed" style={{ fontWeight: 300 }}>
-                Njegov opus karakteriše snažan odnos prema motivu prostora i
-                identiteta. Smajlović gradi kompoziciju kroz slojevitu strukturu
-                boje i materijala.
-              </p>
-              <p className="text-[#8a8580] font-['Outfit'] text-[15px] leading-relaxed" style={{ fontWeight: 300 }}>
-                Član je Udruženja likovnih umjetnika Likum '76 iz Visokog. Izlagao je
-                na samostalnim i grupnim izložbama u Bosni i Hercegovini i regiji.
-              </p>
+              {bioParagraphs.map((para, i) => (
+                <p key={i} className="text-[#8a8580] font-['Outfit'] text-[15px] leading-relaxed" style={{ fontWeight: 300 }}>
+                  {para}
+                </p>
+              ))}
+              {education && (
+                <p className="text-[#8a8580]/60 font-['Outfit'] text-[13px] leading-relaxed border-t border-white/5 pt-4" style={{ fontWeight: 300 }}>
+                  {education}
+                </p>
+              )}
             </div>
 
             {/* Stats - Sačuvani Figma brojači */}

@@ -65,13 +65,13 @@ export function WorkDetailPage() {
   // If we arrived with a fresh `from` state, store it; otherwise read stored
   const closePath = (() => {
     if (stateFrom) {
-      try { sessionStorage.setItem(STORAGE_KEY, stateFrom); } catch {}
+      try { sessionStorage.setItem(STORAGE_KEY, stateFrom); } catch { }
       return stateFrom;
     }
     try {
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored === "/radovi") return "/radovi";
-    } catch {}
+    } catch { }
     return "/";
   })();
 
@@ -214,7 +214,29 @@ export function WorkDetailPage() {
     []
   );
 
-  if (!loading && !work) {
+  // Loading skeleton
+  if (loading) {
+    return (
+      <section className="pt-28 pb-20 px-6 md:px-12 min-h-screen">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex items-center justify-between mb-10">
+            <div className="w-32 h-6 bg-white/5 animate-pulse rounded" />
+            <div className="w-10 h-10 bg-white/5 animate-pulse rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+            <div className="aspect-[4/5] bg-white/5 animate-pulse" />
+            <div className="space-y-6">
+              <div className="w-48 h-4 bg-white/5 animate-pulse rounded" />
+              <div className="w-full h-12 bg-white/5 animate-pulse rounded" />
+              <div className="w-full h-24 bg-white/5 animate-pulse rounded" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!work) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -235,6 +257,7 @@ export function WorkDetailPage() {
     );
   }
 
+  // All work-dependent logic after null check
   const whatsappMessage = encodeURIComponent(
     `Pozdrav! Zanima me djelo "${work.title}" (${work.size}, ${work.year}). Da li je dostupno za kupovinu?`
   );
@@ -251,7 +274,6 @@ export function WorkDetailPage() {
   const relatedWorks = works
     .filter((w) => w.id !== work.id && w.category === work.category)
     .slice(0, 3);
-  // If not enough from same category, fill with random others
   if (relatedWorks.length < 3) {
     const others = works.filter(
       (w) => w.id !== work.id && !relatedWorks.find((r) => r.id === w.id)
