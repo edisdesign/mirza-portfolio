@@ -145,7 +145,7 @@ function RadoviTab() {
                         )}
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
                             <button
                                 onClick={() => setEditWork(work)}
                                 className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-[#c9a96e] transition-colors cursor-pointer"
@@ -279,7 +279,7 @@ function IzlozbeTab() {
                             <p className="font-['Outfit'] text-[#f5f0eb] text-[14px] truncate">{exh.title}</p>
                             <p className="font-['Inter'] text-white/30 text-[11px]">{exh.type} · {exh.date}</p>
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
                             <button
                                 onClick={() => setEditExh(exh)}
                                 className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-[#c9a96e] transition-colors cursor-pointer"
@@ -633,8 +633,8 @@ export function AdminPanel({ open, onClose }: AdminPanelProps) {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex-1 py-3 font-['Inter'] text-[11px] tracking-[0.15em] uppercase transition-all cursor-pointer ${activeTab === tab.id
-                                            ? 'text-[#c9a96e] border-b-2 border-[#c9a96e] -mb-px'
-                                            : 'text-white/30 hover:text-white/60'
+                                        ? 'text-[#c9a96e] border-b-2 border-[#c9a96e] -mb-px'
+                                        : 'text-white/30 hover:text-white/60'
                                         }`}
                                 >
                                     {tab.label}
