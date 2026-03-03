@@ -1,5 +1,4 @@
 import { Link } from 'react-router';
-import { MoreHorizontal } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -19,17 +18,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div>
           <p className="text-[#444] font-['Outfit'] text-[12px] tracking-widest uppercase">
             Designed by Ed
           </p>
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('mirza:openlogin'))}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-white/10 text-white/20 hover:text-[#c9a96e] hover:border-[#c9a96e] hover:bg-white/5 transition-all duration-300"
-            title="Admin Login"
-          >
-            <MoreHorizontal size={16} />
-          </button>
         </div>
       </div>
     </footer>
