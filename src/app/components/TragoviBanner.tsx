@@ -1,16 +1,16 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import { supabase, Exhibition } from "../lib/supabase";
+import { ExhibitionModal } from "./ExhibitionModal";
 
 export function TragoviBanner() {
   const [tragovi, setTragovi] = useState<Exhibition | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      // Fetch the latest exhibition by date (assuming date is sortable)
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('exhibitions')
         .select('*')
         .order('date', { ascending: false })
@@ -23,14 +23,15 @@ export function TragoviBanner() {
   if (!tragovi) return null;
 
   return (
-    <section className="py-20 px-6 md:px-12">
-      <div className="max-w-[1400px] mx-auto">
-        <Link to="/izlozbe?open=1">
+    <>
+      <section className="py-20 px-6 md:px-12">
+        <div className="max-w-[1400px] mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7 }}
+            onClick={() => setModalOpen(true)}
             className="relative overflow-hidden border border-white/5 group cursor-pointer hover:border-[#c9a96e]/20 transition-colors duration-500"
           >
             {/* Background image */}
@@ -49,7 +50,7 @@ export function TragoviBanner() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1 border border-[#c9a96e]/40 text-[#c9a96e] font-['Outfit'] text-[10px] tracking-[0.2em] uppercase">
-                    Samostalna izložba
+                    {tragovi.type || 'Izložba'}
                   </span>
                   <span className="text-[#8a8580] font-['Inter'] text-[12px]">
                     {tragovi.date}
@@ -78,8 +79,15 @@ export function TragoviBanner() {
               </div>
             </div>
           </motion.div>
-        </Link>
-      </div>
-    </section>
+        </div>
+      </section>
+
+      {modalOpen && (
+        <ExhibitionModal
+          exhibition={tragovi}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+    </>
   );
 }

@@ -116,43 +116,50 @@ export function Works({ limit }: { limit?: number }) {
                         {deletingId === work.id ? (
                           <span className="loader w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" /></svg>
                         )}
                       </button>
                     </div>
                   )}
 
-                  <div className={`overflow-hidden ${work.landscape ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}>
-                    {work.image ? (
-                      <img
-                        src={work.image}
-                        alt={work.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-[#333] font-['Outfit'] text-[14px]">
-                        {editMode ? (
-                          <button onClick={() => setEditWork(work)} className="flex flex-col items-center gap-2 text-[#c9a96e] cursor-pointer">
-                            <Pencil size={24} />
-                            <span className="text-[12px] tracking-[0.1em]">Dodaj sliku</span>
-                          </button>
-                        ) : (
-                          <span>🖼</span>
-                        )}
+                  {/* Clickable card — navigates to work detail */}
+                  <Link
+                    to={`/radovi/${work.id}`}
+                    className="block"
+                    onClick={e => editMode && e.preventDefault()}
+                  >
+                    <div className={`overflow-hidden ${work.landscape ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}>
+                      {work.image ? (
+                        <img
+                          src={work.image}
+                          alt={work.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-[#333] font-['Outfit'] text-[14px]">
+                          {editMode ? (
+                            <button onClick={(e) => { e.preventDefault(); setEditWork(work); }} className="flex flex-col items-center gap-2 text-[#c9a96e] cursor-pointer">
+                              <Pencil size={24} />
+                              <span className="text-[12px] tracking-[0.1em]">Dodaj sliku</span>
+                            </button>
+                          ) : (
+                            <span>🖼</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className={`mt-4 flex items-start justify-between gap-4 transition-opacity duration-300 ${hoveredId !== null && hoveredId !== work.id ? 'opacity-40' : 'opacity-100'}`}>
+                      <div>
+                        <h3 className="font-['Outfit'] text-[#f5f0eb] text-[20px] font-semibold mb-1">{work.title}</h3>
+                        <p className="text-[#8a8580] font-['Outfit'] text-[13px]" style={{ fontWeight: 300 }}>
+                          {work.category} · {work.year} {work.size && `· ${work.size}`}
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <div className={`mt-4 flex items-start justify-between gap-4 transition-opacity duration-300 ${hoveredId !== null && hoveredId !== work.id ? 'opacity-40' : 'opacity-100'}`}>
-                    <div>
-                      <h3 className="font-['Outfit'] text-[#f5f0eb] text-[20px] font-semibold mb-1">{work.title}</h3>
-                      <p className="text-[#8a8580] font-['Outfit'] text-[13px]" style={{ fontWeight: 300 }}>
-                        {work.category} · {work.year} {work.size && `· ${work.size}`}
-                      </p>
+                      <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#c9a96e]/40 group-hover:bg-[#c9a96e]/10 transition-all duration-300 mt-1">
+                        <ArrowUpRight size={16} className="text-[#8a8580] group-hover:text-[#c9a96e] transition-colors duration-300" />
+                      </div>
                     </div>
-                    <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:border-[#c9a96e]/40 group-hover:bg-[#c9a96e]/10 transition-all duration-300 mt-1">
-                      <ArrowUpRight size={16} className="text-[#8a8580] group-hover:text-[#c9a96e] transition-colors duration-300" />
-                    </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -163,7 +170,6 @@ export function Works({ limit }: { limit?: number }) {
       {editWork && (
         <WorkEditModal
           work={editWork === 'new' ? null : editWork}
-          open={true}
           onClose={() => setEditWork(null)}
           onSave={fetchWorks}
         />
