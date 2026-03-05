@@ -1,10 +1,11 @@
-import { motion, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { motion, useTransform } from 'framer-motion';
+import { ArrowDown } from 'lucide-react';
 import heroBg from '../../assets/bg.png';
+import { supabase } from '../lib/supabase';
 
-const NAME_TEXT = 'Mirza Smajlović';
 const REPEAT_COUNT = 6;
-const heroPortrait = heroBg;
+const NAME_TEXT = 'Mirza Smajlović';
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -15,6 +16,24 @@ export function Hero() {
   const mouseRef = useRef({ x: -200, y: -200 });
   const hoveringRef = useRef(false);
   const touchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Dynamic hero image from Supabase (fallback: local bg.png)
+  const [heroSrc, setHeroSrc] = useState<string>(heroBg);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'hero_image')
+        .single();
+      if (data?.value) setHeroSrc(data.value);
+    };
+    load();
+    const h = () => load();
+    window.addEventListener('mirza:refresh', h);
+    return () => window.removeEventListener('mirza:refresh', h);
+  }, []);
 
   // Parallax
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -195,7 +214,7 @@ export function Hero() {
           className="absolute inset-0"
         >
           <img
-            src={heroPortrait}
+            src={heroSrc}
             alt="Mirza Smajlović"
             className="w-full h-full object-cover object-top grayscale brightness-[0.4]"
           />

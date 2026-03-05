@@ -253,17 +253,15 @@ export function ExhibitionsPage() {
 
       <Footer />
 
-      {selected && (
-        <ExhibitionModal
-          exhibition={selected}
-          onClose={() => setSelected(null)}
-          onNavigate={(id) => {
-            const ex = exhibitions.find((e) => e.id === id);
-            if (ex) setSelected(ex);
-          }}
-          allExhibitions={exhibitions}
-        />
-      )}
+      <ExhibitionModal
+        exhibition={selected}
+        onClose={() => setSelected(null)}
+        onNavigate={(id) => {
+          const ex = exhibitions.find((e) => e.id === id);
+          if (ex) setSelected(ex);
+        }}
+        allExhibitions={exhibitions}
+      />
 
       {editExh && (
         <ExhibitionEditModal exhibition={editExh} onClose={() => setEditExh(null)} onSaved={() => { /* refresh will come from event */ }} />

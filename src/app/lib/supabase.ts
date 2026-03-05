@@ -31,3 +31,11 @@ export type Exhibition = {
   details: string;
   sort_order: number;
 };
+
+export type AtelierImage = {
+  id: number;
+  url: string;
+  sort_order: number;
+  created_at: string;
+};
+

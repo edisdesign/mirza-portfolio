@@ -4,12 +4,13 @@ import {
     X, Pencil, Trash2, Plus, GripVertical, Eye, EyeOff,
     Image as ImageIcon, Save, ChevronDown, ChevronUp,
 } from 'lucide-react';
-import { supabase, type Work, type Exhibition } from '../lib/supabase';
+import { supabase, type Work, type Exhibition, type AtelierImage } from '../lib/supabase';
 import { toast } from 'sonner';
 import { WorkEditModal } from './WorkEditModal';
 import { ExhibitionEditModal } from './ExhibitionEditModal';
+import atelierImg from '../../assets/atelier.jpg';
 
-type Tab = 'radovi' | 'izlozbe' | 'cover' | 'biografija';
+type Tab = 'radovi' | 'izlozbe' | 'cover' | 'biografija' | 'atelje' | 'hero';
 
 interface AdminPanelProps {
     open: boolean;
@@ -579,12 +580,236 @@ function BiografijaTab() {
     );
 }
 
+// ─── ATELJE TAB ───────────────────────────────────────────────────────────────
+function AteljeTab() {
+    const [images, setImages] = useState<AtelierImage[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+
+    // Auto-seed the default local image into Supabase on first use
+    const seedDefaultImage = async () => {
+        try {
+            const response = await fetch(atelierImg);
+            const blob = await response.blob();
+            const path = `atelier/default_atelier.jpg`;
+            const { error: upErr } = await supabase.storage
+                .from('images')
+                .upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+            if (upErr) throw upErr;
+            const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
+            await supabase.from('atelier_images').insert({ url: urlData.publicUrl, sort_order: 0 });
+        } catch (err) {
+            console.warn('Could not seed default atelier image:', err);
+        }
+    };
+
+    const fetchImages = async () => {
+        setLoading(true);
+        const { data } = await supabase
+            .from('atelier_images')
+            .select('*')
+            .order('sort_order', { ascending: true });
+        const imgs = data ?? [];
+        // First-time setup: seed the default local image into Supabase
+        if (imgs.length === 0) {
+            await seedDefaultImage();
+            const { data: seeded } = await supabase
+                .from('atelier_images')
+                .select('*')
+                .order('sort_order', { ascending: true });
+            setImages(seeded ?? []);
+        } else {
+            setImages(imgs);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => { fetchImages(); }, []);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        setUploading(true);
+        try {
+            for (const file of Array.from(files)) {
+                const ext = file.name.split('.').pop();
+                const path = `atelier/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+                const { error: upErr } = await supabase.storage.from('images').upload(path, file, { upsert: false });
+                if (upErr) throw upErr;
+                const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
+                const { error: dbErr } = await supabase.from('atelier_images').insert({ url: urlData.publicUrl, sort_order: images.length });
+                if (dbErr) throw dbErr;
+            }
+            toast.success('Slike uploaodvane!');
+            window.dispatchEvent(new Event('mirza:refresh'));
+            fetchImages();
+        } catch (err: any) {
+            toast.error('Greška: ' + err.message);
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleDelete = async (img: AtelierImage) => {
+        try {
+            const marker = '/images/';
+            const idx = img.url.indexOf(marker);
+            if (idx !== -1) {
+                const path = img.url.slice(idx + marker.length);
+                await supabase.storage.from('images').remove([path]);
+            }
+            await supabase.from('atelier_images').delete().eq('id', img.id);
+            toast.success('Slika obrisana!');
+            window.dispatchEvent(new Event('mirza:refresh'));
+            fetchImages();
+        } catch (err: any) {
+            toast.error('Greška: ' + err.message);
+        }
+    };
+
+    if (loading) return <div className="p-6 space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-white/5 animate-pulse rounded" />)}</div>;
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="px-6 py-4 border-b border-white/10">
+                <p className="text-white/40 font-['Inter'] text-[11px] tracking-[0.2em] uppercase mb-1">Slike ateljea</p>
+                <p className="text-white/25 font-['Inter'] text-[11px]">Slike se automatski rotiraju u slideshow-u. Max preporučeno: 8.</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+                {/* Grid thumbnail */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    {images.map((img) => (
+                        <div key={img.id} className="relative aspect-[4/3] overflow-hidden rounded-sm bg-white/5 group">
+                            <img src={img.url} alt="Atelje" className="w-full h-full object-cover" />
+                            <button
+                                onClick={() => handleDelete(img)}
+                                className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/70 text-white/50 hover:text-red-400 hover:bg-black/90 rounded-sm transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                            >
+                                <Trash2 size={12} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Upload */}
+                <label className={`w-full py-4 border border-dashed border-white/15 flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : 'hover:border-[#c9a96e]/40 hover:bg-[#c9a96e]/[0.02]'}`}>
+                    <ImageIcon size={18} className="text-white/20" />
+                    <span className="font-['Inter'] text-[11px] tracking-[0.15em] uppercase text-white/30">
+                        {uploading ? 'Uploading...' : 'Dodaj slike'}
+                    </span>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleUpload}
+                        disabled={uploading}
+                    />
+                </label>
+            </div>
+        </div>
+    );
+}
+
+// ─── HERO TAB ─────────────────────────────────────────────────────────────────
+function HeroTab() {
+    const [currentUrl, setCurrentUrl] = useState<string>('');
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const { data } = await supabase.from('settings').select('value').eq('key', 'hero_image').single();
+            setCurrentUrl(data?.value ?? '');
+            setLoading(false);
+        })();
+    }, []);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const ext = file.name.split('.').pop();
+            const path = `hero/hero_${Date.now()}.${ext}`;
+            const { error: upErr } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
+            await supabase.from('settings').upsert({ key: 'hero_image', value: urlData.publicUrl }, { onConflict: 'key' });
+            setCurrentUrl(urlData.publicUrl);
+            toast.success('Hero slika sačuvana! Refreshaj stranicu.');
+            window.dispatchEvent(new Event('mirza:refresh'));
+        } catch (err: any) {
+            toast.error('Greška: ' + err.message);
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleClear = async () => {
+        await supabase.from('settings').upsert({ key: 'hero_image', value: '' }, { onConflict: 'key' });
+        setCurrentUrl('');
+        toast.success('Hero vraćena na defaultnu sliku.');
+        window.dispatchEvent(new Event('mirza:refresh'));
+    };
+
+    if (loading) return <div className="p-6"><div className="h-48 bg-white/5 animate-pulse rounded" /></div>;
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="px-6 py-4 border-b border-white/10">
+                <p className="text-white/40 font-['Inter'] text-[11px] tracking-[0.2em] uppercase mb-1">Hero slika</p>
+                <p className="text-white/25 font-['Inter'] text-[11px]">Pozadinska slika na naslovnici (Hero sekcija).</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+                {/* Current preview */}
+                {currentUrl ? (
+                    <div className="relative aspect-video overflow-hidden rounded-sm bg-white/5">
+                        <img src={currentUrl} alt="Current hero" className="w-full h-full object-cover" />
+                        <div className="absolute top-2 right-2">
+                            <button
+                                onClick={handleClear}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-black/70 hover:bg-red-500/80 text-white/60 hover:text-white font-['Inter'] text-[10px] tracking-[0.1em] uppercase transition-all cursor-pointer rounded-sm"
+                            >
+                                <X size={10} />Reset
+                            </button>
+                        </div>
+                        <div className="absolute bottom-2 left-2">
+                            <span className="px-2 py-1 bg-[#c9a96e]/90 text-[#0a0a0a] font-['Inter'] text-[9px] tracking-[0.15em] uppercase rounded-sm">Aktivna</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="aspect-video bg-white/3 border border-white/8 rounded-sm flex flex-col items-center justify-center gap-2">
+                        <ImageIcon size={24} className="text-white/15" />
+                        <p className="text-white/25 font-['Inter'] text-[11px]">Koristi se defaultna slika</p>
+                    </div>
+                )}
+
+                {/* Upload */}
+                <label className={`w-full py-4 border border-dashed border-white/15 flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : 'hover:border-[#c9a96e]/40 hover:bg-[#c9a96e]/[0.02]'}`}>
+                    <ImageIcon size={18} className="text-white/20" />
+                    <span className="font-['Inter'] text-[11px] tracking-[0.15em] uppercase text-white/30">
+                        {uploading ? 'Uploading...' : 'Promijeni hero sliku'}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
+                </label>
+            </div>
+        </div>
+    );
+}
+
 // ─── MAIN PANEL ───────────────────────────────────────────────────────────────
 const TABS: { id: Tab; label: string }[] = [
     { id: 'radovi', label: 'Radovi' },
     { id: 'izlozbe', label: 'Izložbe' },
     { id: 'cover', label: 'Cover' },
     { id: 'biografija', label: 'Biografija' },
+    { id: 'atelje', label: 'Atelje' },
+    { id: 'hero', label: 'Hero' },
 ];
 
 export function AdminPanel({ open, onClose }: AdminPanelProps) {
@@ -648,6 +873,8 @@ export function AdminPanel({ open, onClose }: AdminPanelProps) {
                             {activeTab === 'izlozbe' && <IzlozbeTab />}
                             {activeTab === 'cover' && <CoverTab />}
                             {activeTab === 'biografija' && <BiografijaTab />}
+                            {activeTab === 'atelje' && <AteljeTab />}
+                            {activeTab === 'hero' && <HeroTab />}
                         </div>
                     </motion.div>
                 </>
