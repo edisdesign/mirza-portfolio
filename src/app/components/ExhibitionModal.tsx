@@ -15,13 +15,14 @@ export function ExhibitionModal({
   allExhibitions = [],
   onNavigate
 }: ExhibitionModalProps) {
-  const currentIndex = allExhibitions.findIndex(e => e.id === exhibition.id);
+  const currentIndex = exhibition ? allExhibitions.findIndex(e => e.id === exhibition.id) : -1;
   const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < allExhibitions.length - 1;
+  const hasNext = currentIndex !== -1 && currentIndex < allExhibitions.length - 1;
 
   const handlePrev = () => {
     if (hasPrev) onNavigate?.(allExhibitions[currentIndex - 1].id);
   };
+
 
   const handleNext = () => {
     if (hasNext) onNavigate?.(allExhibitions[currentIndex + 1].id);
@@ -116,8 +117,8 @@ export function ExhibitionModal({
                   onClick={handlePrev}
                   disabled={!hasPrev}
                   className={`p-2 rounded-full transition-all ${hasPrev
-                      ? 'hover:bg-[#c9a96e]/20 text-[#c9a96e]'
-                      : 'text-[#8a8580]/30 cursor-not-allowed'
+                    ? 'hover:bg-[#c9a96e]/20 text-[#c9a96e]'
+                    : 'text-[#8a8580]/30 cursor-not-allowed'
                     }`}
                 >
                   <ChevronLeft size={24} />
@@ -129,8 +130,8 @@ export function ExhibitionModal({
                   onClick={handleNext}
                   disabled={!hasNext}
                   className={`p-2 rounded-full transition-all ${hasNext
-                      ? 'hover:bg-[#c9a96e]/20 text-[#c9a96e]'
-                      : 'text-[#8a8580]/30 cursor-not-allowed'
+                    ? 'hover:bg-[#c9a96e]/20 text-[#c9a96e]'
+                    : 'text-[#8a8580]/30 cursor-not-allowed'
                     }`}
                 >
                   <ChevronRight size={24} />
